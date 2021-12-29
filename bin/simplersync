@@ -105,7 +105,7 @@ cleanup() {
 				simplewebhook update package ${MAPPED_PACKAGE} success
 			fi
 			if [ -n "${MAPPED_RELEASE}" ]; then
-				simplewebhook update release ${MAPPED_PACKAGE}
+				simplewebhook update release ${MAPPED_RELEASE}
 			fi
 		fi
 		if [ "x${ERRORSONLY}x" = "xfalsex" ]; then
