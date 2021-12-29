@@ -97,14 +97,14 @@ cleanup() {
 		# In case rsync had something on stderr
 		if [ -s "${LOGDIR}/rsync-${NAME}.error" ]; then
 			mail -e -s "[${PROGRAM}@$(hostname -s)] ($$) rsync ERROR on $(date +"%Y.%m.%d-%H:%M:%S")" ${MAILTO} < "${LOGDIR}/rsync-${NAME}.error"
-			if [ -n "${MAPPED_PACKAGE}" ]; then
+			if ! [ -z "${MAPPED_PACKAGE}+set" ]; then
 				simplewebhook update package ${MAPPED_PACKAGE} failed
 			fi
 		else
-			if [ -n "${MAPPED_PACKAGE}" ]; then
+			if ! [ -z "${MAPPED_PACKAGE}+set" ]; then
 				simplewebhook update package ${MAPPED_PACKAGE} success
 			fi
-			if [ -n "${MAPPED_RELEASE}" ]; then
+			if ! [ -z "${MAPPED_RELEASE}+set" ]; then
 				simplewebhook update release ${MAPPED_RELEASE}
 			fi
 		fi
@@ -162,7 +162,7 @@ exec >"${LOGFILE}" 2>&1 <&-
 log "Mirrorsync start"
 log "Running rsync: rsync ${SIMPLE_RSYNC_OPTIONS} ${SIMPLE_RSYNC_EXTRA} --exclude=${LOCKFILE} --exclude=.~tmp~/ --exclude=.*.*.[a-zA-Z0-9][a-zA-Z0-9][a-zA-Z0-9][a-zA-Z0-9][a-zA-Z0-9][a-zA-Z0-9] ${RSYNC_ADDR} ${TO}"
 
-if [ -n "${MAPPED_PACKAGE}" ]; then
+if ! [ -z "${MAPPED_PACKAGE}+set" ]; then
 	simplewebhook update package ${MAPPED_PACKAGE} syncing
 fi
 

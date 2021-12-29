@@ -8,10 +8,6 @@ set -u
 # the important part here)
 set -E
 
-if [ -n "${MAPPED_PACKAGE}" ]; then
-	simplewebhook update package ${MAPPED_PACKAGE} syncing
-fi
-
 # ftpsync script for Debian
 # Based losely on a number of existing scripts, written by an
 # unknown number of different people over the years.
@@ -130,14 +126,14 @@ cleanup() {
         # In case rsync had something on stderr
         if [ -s "${LOGDIR}/rsync-${NAME}.error" ]; then
             mail -e -s "[${PROGRAM}@$(hostname -s)] ($$) rsync ERROR on $(date +"%Y.%m.%d-%H:%M:%S")" ${MAILTO} < "${LOGDIR}/rsync-${NAME}.error"
-            if [ -n "${MAPPED_PACKAGE}" ]; then
+			if ! [ -z "${MAPPED_PACKAGE}+set" ]; then
 				simplewebhook update package ${MAPPED_PACKAGE} failed
 			fi
 		else
-			if [ -n "${MAPPED_PACKAGE}" ]; then
+			if ! [ -z "${MAPPED_PACKAGE}+set" ]; then
 				simplewebhook update package ${MAPPED_PACKAGE} success
 			fi
-			if [ -n "${MAPPED_RELEASE}" ]; then
+			if ! [ -z "${MAPPED_RELEASE}+set" ]; then
 				simplewebhook update release ${MAPPED_RELEASE}
 			fi
         fi
@@ -467,6 +463,9 @@ trap cleanup ERR TERM HUP INT QUIT
 # Start log by redirecting stdout and stderr there and closing stdin
 exec >"$LOG" 2>&1 <&-
 log "Mirrorsync start"
+if ! [ -z "${MAPPED_PACKAGE}+set" ]; then
+	simplewebhook update package ${MAPPED_PACKAGE} syncing
+fi
 
 # Look who pushed us and note that in the log.
 SSH_CONNECTION=${SSH_CONNECTION:-""}
