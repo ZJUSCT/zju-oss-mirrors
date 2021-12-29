@@ -8,6 +8,10 @@ set -u
 # the important part here)
 set -E
 
+if [ -n "${MAPPED_PACKAGE}" ]; then
+	simplewebhook update package ${MAPPED_PACKAGE} syncing
+fi
+
 # ftpsync script for Debian
 # Based losely on a number of existing scripts, written by an
 # unknown number of different people over the years.
@@ -126,6 +130,16 @@ cleanup() {
         # In case rsync had something on stderr
         if [ -s "${LOGDIR}/rsync-${NAME}.error" ]; then
             mail -e -s "[${PROGRAM}@$(hostname -s)] ($$) rsync ERROR on $(date +"%Y.%m.%d-%H:%M:%S")" ${MAILTO} < "${LOGDIR}/rsync-${NAME}.error"
+            if [ -n "${MAPPED_PACKAGE}" ]; then
+				simplewebhook update package ${MAPPED_PACKAGE} failed
+			fi
+		else
+			if [ -n "${MAPPED_PACKAGE}" ]; then
+				simplewebhook update package ${MAPPED_PACKAGE} success
+			fi
+			if [ -n "${MAPPED_RELEASE}" ]; then
+				simplewebhook update release ${MAPPED_PACKAGE}
+			fi
         fi
         if [ "x${ERRORSONLY}x" = "xfalsex" ]; then
             # And the normal log
