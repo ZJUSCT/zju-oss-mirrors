@@ -1,0 +1,25 @@
+#! /bin/bash
+
+set -e
+set -u
+set -E
+
+BASE_URL=http://localhost:6000
+COMMAND=$1
+
+if [ "$COMMAND" == "reload" ]; then
+  curl -X POST ${BASE_URL}/webhook/reload
+elif [ "$COMMAND" == "update" ]; then
+  SUBCOMMAND=$2
+  TARGET=$3
+  if [ "$SUBCOMMAND" == "package" ]; then
+    STATUS=$4 # syncing, failed, success, pause
+    curl -X PATCH -F "status=$STATUS" ${BASE_URL}/webhook/package/${TARGET}
+  elif [ "$SUBCOMMAND" == "release" ]; then
+    curl -X POST ${BASE_URL}/webhook/release/${TARGET}
+  else
+    echo "Usage: simplewebhook update package | release"
+  fi
+else
+  echo "Usage: simplewebhook reload | update"
+fi
